@@ -1,0 +1,1591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sports Community Hub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1e3a8a',      // Dark blue
+                        secondary: '#059669',    // Emerald green
+                        accent: '#7c3aed',       // Violet
+                        dark: '#0f172a',         // Dark blue-gray
+                        light: '#f1f5f9',       // Light gray
+                        sport: '#dc2626',        // Sports red
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.3s ease-in-out',
+                        'slide-up': 'slideUp 0.2s ease-out',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(10px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+        
+        /* Chat animations */
+        .chat-message {
+            animation: slideUp 0.2s ease-out;
+        }
+        
+        /* Notification badge */
+        .notification-badge {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        /* Gradient backgrounds */
+        .gradient-primary {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+        }
+        .gradient-secondary {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+        }
+        .gradient-accent {
+            background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+        }
+        .gradient-sport {
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+        }
+        
+        /* Card hover effects */
+        .hover-card {
+            transition: all 0.2s ease;
+        }
+        .hover-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* Button animations */
+        .btn-animate {
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-animate::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            transition: left 0.2s ease;
+        }
+        .btn-animate:hover::before {
+            left: 100%;
+        }
+        
+        /* Performance optimization */
+        * {
+            will-change: transform, opacity;
+        }
+        
+        /* Sporty design elements */
+        .sport-pattern {
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-white font-sans sport-pattern">
+    <!-- Header -->
+    <header class="gradient-primary text-white shadow-lg sticky top-0 z-40">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="bg-white bg-opacity-10 p-2 rounded-full">
+                    <i class="fas fa-football-ball text-2xl text-sport"></i>
+                </div>
+                <h1 class="text-2xl font-bold tracking-tight">DEADLY BROTHERS</h1>
+            </div>
+            <div id="userInfo" class="hidden animate-fade-in">
+                <div class="flex items-center space-x-4">
+                    <div class="bg-white bg-opacity-10 px-4 py-2 rounded-full">
+                        <span id="usernameDisplay" class="font-medium"></span>
+                    </div>
+                    <button onclick="logout()" class="bg-sport hover:bg-red-700 px-4 py-2 rounded-full transition duration-200 btn-animate flex items-center">
+                        <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Navigation -->
+    <nav id="mainNav" class="bg-slate-800 shadow-lg sticky top-16 z-30 hidden">
+        <div class="container mx-auto px-4">
+            <div class="flex space-x-1 overflow-x-auto">
+                <button onclick="showSection('dashboard')" class="nav-btn px-5 py-3 text-gray-300 hover:bg-slate-700 hover:text-white rounded-t-lg transition duration-200 flex items-center whitespace-nowrap">
+                    <i class="fas fa-home mr-2"></i>Dashboard
+                </button>
+                <button onclick="showSection('voting')" class="nav-btn px-5 py-3 text-gray-300 hover:bg-slate-700 hover:text-white rounded-t-lg transition duration-200 flex items-center whitespace-nowrap">
+                    <i class="fas fa-vote-yea mr-2"></i>Voting
+                </button>
+                <button onclick="showSection('chat')" class="nav-btn px-5 py-3 text-gray-300 hover:bg-slate-700 hover:text-white rounded-t-lg transition duration-200 flex items-center whitespace-nowrap relative">
+                    <i class="fas fa-comments mr-2"></i>Chat
+                    <span id="chatNotification" class="absolute top-1 right-1 bg-sport text-white text-xs rounded-full h-5 w-5 flex items-center justify-center notification-badge hidden">!</span>
+                </button>
+                <button onclick="showSection('rules')" class="nav-btn px-5 py-3 text-gray-300 hover:bg-slate-700 hover:text-white rounded-t-lg transition duration-200 flex items-center whitespace-nowrap">
+                    <i class="fas fa-book mr-2"></i>Rules
+                </button>
+                <button id="adminPanelBtn" onclick="showSection('admin')" class="nav-btn px-5 py-3 text-gray-300 hover:bg-slate-700 hover:text-white rounded-t-lg transition duration-200 flex items-center whitespace-nowrap hidden">
+                    <i class="fas fa-cog mr-2"></i>Admin Panel
+                </button>
+                <button id="leaderPanelBtn" onclick="showSection('leader')" class="nav-btn px-5 py-3 text-gray-300 hover:bg-slate-700 hover:text-white rounded-t-lg transition duration-200 flex items-center whitespace-nowrap hidden">
+                    <i class="fas fa-crown mr-2"></i>Leader Panel
+                </button>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-6">
+        <!-- Login Section -->
+        <section id="loginSection" class="max-w-md mx-auto animate-fade-in">
+            <div class="bg-slate-800 rounded-2xl shadow-xl overflow-hidden">
+                <div class="gradient-primary p-6 text-white">
+                    <h2 class="text-2xl font-bold mb-1">Welcome Back</h2>
+                    <p class="opacity-90 text-sm">Sign in to your account</p>
+                </div>
+                <div class="p-6">
+                    <form onsubmit="login(event)" class="space-y-4">
+                        <div>
+                            <label class="block text-gray-300 mb-2 font-medium text-sm">Username</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="fas fa-user text-gray-500"></i>
+                                </div>
+                                <input type="text" id="loginUsername" required class="w-full pl-10 pr-4 py-2.5 bg-slate-700 border border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200 text-white" placeholder="Enter username">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-gray-300 mb-2 font-medium text-sm">Password</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="fas fa-lock text-gray-500"></i>
+                                </div>
+                                <input type="password" id="loginPassword" required class="w-full pl-10 pr-4 py-2.5 bg-slate-700 border border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200 text-white" placeholder="Enter password">
+                            </div>
+                        </div>
+                        <button type="submit" class="w-full gradient-primary text-white font-bold py-2.5 px-4 rounded-lg transition duration-200 btn-animate">
+                            Sign In
+                        </button>
+                    </form>
+                    <p class="text-center mt-4 text-gray-400 text-sm">
+                        Don't have an account? <a href="#" onclick="showSection('register')" class="text-primary hover:underline font-medium">Register here</a>
+                    </p>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Registration Section -->
+        <section id="registerSection" class="max-w-md mx-auto hidden animate-fade-in">
+            <div class="bg-slate-800 rounded-2xl shadow-xl overflow-hidden">
+                <div class="gradient-secondary p-6 text-white">
+                    <h2 class="text-2xl font-bold mb-1">Join Our Community</h2>
+                    <p class="opacity-90 text-sm">Create your account today</p>
+                </div>
+                <div class="p-6">
+                    <form onsubmit="register(event)" class="space-y-4">
+                        <div>
+                            <label class="block text-gray-300 mb-2 font-medium text-sm">Username</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="fas fa-user text-gray-500"></i>
+                                </div>
+                                <input type="text" id="regUsername" required class="w-full pl-10 pr-4 py-2.5 bg-slate-700 border border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary focus:border-transparent transition duration-200 text-white" placeholder="Choose a username">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-gray-300 mb-2 font-medium text-sm">Password</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="fas fa-lock text-gray-500"></i>
+                                </div>
+                                <input type="password" id="regPassword" required class="w-full pl-10 pr-4 py-2.5 bg-slate-700 border border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary focus:border-transparent transition duration-200 text-white" placeholder="Create a password">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-gray-300 mb-2 font-medium text-sm">Favorite Sport</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="fas fa-football-ball text-gray-500"></i>
+                                </div>
+                                <select id="regSport" class="w-full pl-10 pr-4 py-2.5 bg-slate-700 border border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary focus:border-transparent transition duration-200 text-white appearance-none">
+                                    <option value="Football">Football</option>
+                                    <option value="Basketball">Basketball</option>
+                                    <option value="Tennis">Tennis</option>
+                                    <option value="Cricket">Cricket</option>
+                                    <option value="Baseball">Baseball</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                                <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                                    <i class="fas fa-chevron-down text-gray-500"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="submit" class="w-full gradient-secondary text-white font-bold py-2.5 px-4 rounded-lg transition duration-200 btn-animate">
+                            Create Account
+                        </button>
+                    </form>
+                    <p class="text-center mt-4 text-gray-400 text-sm">
+                        Already have an account? <a href="#" onclick="showSection('login')" class="text-primary hover:underline font-medium">Login here</a>
+                    </p>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Dashboard Section -->
+        <section id="dashboardSection" class="hidden animate-fade-in">
+            <div class="mb-6">
+                <h2 class="text-3xl font-bold mb-1">Community Dashboard</h2>
+                <p class="text-gray-400 text-sm">Welcome to your community hub</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div class="bg-slate-800 rounded-xl shadow-lg p-5 hover-card">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="bg-blue-900 bg-opacity-50 p-2.5 rounded-full">
+                            <i class="fas fa-users text-xl text-blue-400"></i>
+                        </div>
+                        <span class="text-xs font-medium text-blue-400 bg-blue-900 bg-opacity-30 px-2 py-1 rounded-full">+12%</span>
+                    </div>
+                    <p class="text-gray-400 mb-1 text-sm">Total Members</p>
+                    <p class="text-2xl font-bold" id="totalMembers">0</p>
+                </div>
+                
+                <div class="bg-slate-800 rounded-xl shadow-lg p-5 hover-card">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="bg-green-900 bg-opacity-50 p-2.5 rounded-full">
+                            <i class="fas fa-poll text-xl text-green-400"></i>
+                        </div>
+                        <span class="text-xs font-medium text-green-400 bg-green-900 bg-opacity-30 px-2 py-1 rounded-full">Active</span>
+                    </div>
+                    <p class="text-gray-400 mb-1 text-sm">Active Polls</p>
+                    <p class="text-2xl font-bold" id="activePolls">0</p>
+                </div>
+                
+                <div class="bg-slate-800 rounded-xl shadow-lg p-5 hover-card">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="bg-purple-900 bg-opacity-50 p-2.5 rounded-full">
+                            <i class="fas fa-book text-xl text-purple-400"></i>
+                        </div>
+                        <span class="text-xs font-medium text-purple-400 bg-purple-900 bg-opacity-30 px-2 py-1 rounded-full">Active</span>
+                    </div>
+                    <p class="text-gray-400 mb-1 text-sm">Community Rules</p>
+                    <p class="text-2xl font-bold" id="activeRules">0</p>
+                </div>
+            </div>
+            
+            <!-- Recent Activity -->
+            <div class="bg-slate-800 rounded-xl shadow-lg p-5">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-bold">Recent Community Activity</h3>
+                    <button class="text-primary hover:text-primary-80 text-sm font-medium">View All</button>
+                </div>
+                <div class="space-y-3" id="recentActivity">
+                    <div class="text-center py-6 text-gray-500">
+                        <i class="fas fa-history text-3xl mb-2"></i>
+                        <p class="text-sm">No recent activity</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Voting Section -->
+        <section id="votingSection" class="hidden animate-fade-in">
+            <div class="mb-6">
+                <h2 class="text-3xl font-bold mb-1">Community Voting</h2>
+                <p class="text-gray-400 text-sm">Make your voice heard</p>
+            </div>
+            
+            <div id="pollsContainer" class="space-y-4">
+                <div class="text-center py-10 bg-slate-800 rounded-xl shadow-lg">
+                    <i class="fas fa-poll text-5xl text-gray-600 mb-3"></i>
+                    <p class="text-gray-500">No polls available. Create your first poll!</p>
+                </div>
+            </div>
+            
+            <!-- Create Poll Button (Admin/Leader only) -->
+            <button id="createPollBtn" onclick="showCreatePoll()" class="mt-6 bg-gradient-to-r from-secondary to-secondary-80 hover:from-secondary-80 hover:to-secondary-70 text-white font-bold py-2.5 px-5 rounded-lg transition duration-200 btn-animate flex items-center mx-auto hidden">
+                <i class="fas fa-plus mr-2"></i>Create New Poll
+            </button>
+        </section>
+        
+        <!-- Chat Section -->
+        <section id="chatSection" class="hidden animate-fade-in">
+            <div class="mb-6">
+                <h2 class="text-3xl font-bold mb-1">Community Chat</h2>
+                <p class="text-gray-400 text-sm">Connect with your community</p>
+            </div>
+            
+            <div class="bg-slate-800 rounded-xl shadow-xl overflow-hidden">
+                <!-- Chat Tabs -->
+                <div class="flex border-b border-slate-700">
+                    <button onclick="showChatTab('group')" class="chat-tab flex-1 px-5 py-3 font-semibold text-primary border-b-2 border-primary flex items-center justify-center">
+                        <i class="fas fa-users mr-2"></i>Group Chat
+                    </button>
+                    <button onclick="showChatTab('personal')" class="chat-tab flex-1 px-5 py-3 font-semibold text-gray-400 hover:text-primary flex items-center justify-center">
+                        <i class="fas fa-user mr-2"></i>Personal Chat
+                    </button>
+                </div>
+                
+                <!-- Group Chat -->
+                <div id="groupChat" class="p-5">
+                    <div class="h-80 overflow-y-auto mb-3 space-y-3" id="groupMessages">
+                        <div class="text-center py-8 text-gray-500">
+                            <i class="fas fa-comments text-3xl mb-2"></i>
+                            <p>No messages yet. Start the conversation!</p>
+                        </div>
+                    </div>
+                    <form onsubmit="sendGroupMessage(event)" class="flex space-x-2">
+                        <div class="flex-1 relative">
+                            <input type="text" id="groupMessageInput" placeholder="Type your message..." class="w-full px-4 py-2.5 bg-slate-700 border border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-white">
+                            <button type="button" class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-300">
+                                <i class="fas fa-smile"></i>
+                            </button>
+                        </div>
+                        <button type="submit" class="bg-primary hover:bg-primary-80 text-white px-4 py-2.5 rounded-lg transition duration-200">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </form>
+                </div>
+                
+                <!-- Personal Chat -->
+                <div id="personalChat" class="p-5 hidden">
+                    <div class="mb-3">
+                        <select id="userSelect" class="w-full px-4 py-2.5 bg-slate-700 border border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-white">
+                            <option value="">Select a user to chat with</option>
+                        </select>
+                    </div>
+                    <div class="h-80 overflow-y-auto mb-3 space-y-3" id="personalMessages">
+                        <div class="text-center py-8 text-gray-500">
+                            <i class="fas fa-user-circle text-3xl mb-2"></i>
+                            <p>Select a user to start chatting</p>
+                        </div>
+                    </div>
+                    <form onsubmit="sendPersonalMessage(event)" class="flex space-x-2">
+                        <div class="flex-1 relative">
+                            <input type="text" id="personalMessageInput" placeholder="Type your message..." class="w-full px-4 py-2.5 bg-slate-700 border border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-white" disabled>
+                            <button type="button" class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-300">
+                                <i class="fas fa-smile"></i>
+                            </button>
+                        </div>
+                        <button type="submit" class="bg-primary hover:bg-primary-80 text-white px-4 py-2.5 rounded-lg transition duration-200" disabled>
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Rules Section -->
+        <section id="rulesSection" class="hidden animate-fade-in">
+            <div class="mb-6">
+                <h2 class="text-3xl font-bold mb-1">Community Rules</h2>
+                <p class="text-gray-400 text-sm">Guidelines for our community</p>
+            </div>
+            
+            <div class="bg-slate-800 rounded-xl shadow-xl p-5">
+                <div id="rulesList" class="space-y-3">
+                    <div class="text-center py-10 text-gray-500">
+                        <i class="fas fa-book-open text-5xl mb-3"></i>
+                        <p class="text-lg">No rules have been set yet.</p>
+                    </div>
+                </div>
+                
+                <!-- Add Rule Button (Admin/Leader only) -->
+                <button id="addRuleBtn" onclick="showAddRuleModal()" class="mt-6 bg-gradient-to-r from-accent to-accent-80 hover:from-accent-80 hover:to-accent-70 text-white font-bold py-2.5 px-5 rounded-lg transition duration-200 btn-animate flex items-center mx-auto hidden">
+                    <i class="fas fa-plus mr-2"></i>Add New Rule
+                </button>
+            </div>
+        </section>
+        
+        <!-- Admin Panel -->
+        <section id="adminSection" class="hidden animate-fade-in">
+            <div class="mb-6">
+                <h2 class="text-3xl font-bold mb-1">Admin Panel</h2>
+                <p class="text-gray-400 text-sm">Manage your community</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="bg-slate-800 rounded-xl shadow-lg p-5">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-bold">Manage Polls</h3>
+                        <button onclick="showCreatePoll()" class="text-primary hover:text-primary-80">
+                            <i class="fas fa-plus-circle text-lg"></i>
+                        </button>
+                    </div>
+                    <div id="adminPollsList" class="space-y-2">
+                        <div class="text-center py-6 text-gray-500">
+                            <i class="fas fa-poll text-3xl mb-2"></i>
+                            <p>No polls available</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-slate-800 rounded-xl shadow-lg p-5">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-bold">Manage Users</h3>
+                        <button onclick="showAddUserModal()" class="text-primary hover:text-primary-80">
+                            <i class="fas fa-user-plus text-lg"></i>
+                        </button>
+                    </div>
+                    <div id="usersList" class="space-y-2">
+                        <div class="text-center py-6 text-gray-500">
+                            <i class="fas fa-users text-3xl mb-2"></i>
+                            <p>No users found</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-slate-800 rounded-xl shadow-lg p-5 md:col-span-2">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-bold">Manage Rules</h3>
+                        <button onclick="showAddRuleModal()" class="text-primary hover:text-primary-80">
+                            <i class="fas fa-plus-circle text-lg"></i>
+                        </button>
+                    </div>
+                    <div id="adminRulesList" class="space-y-2">
+                        <div class="text-center py-6 text-gray-500">
+                            <i class="fas fa-book text-3xl mb-2"></i>
+                            <p>No rules available</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Leader Panel -->
+        <section id="leaderSection" class="hidden animate-fade-in">
+            <div class="mb-6">
+                <h2 class="text-3xl font-bold mb-1">Leader Panel</h2>
+                <p class="text-gray-400 text-sm">Manage community features</p>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <div class="bg-slate-800 rounded-xl shadow-lg p-5">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-bold">Manage Polls</h3>
+                        <button onclick="showCreatePoll()" class="text-primary hover:text-primary-80">
+                            <i class="fas fa-plus-circle text-lg"></i>
+                        </button>
+                    </div>
+                    <div id="leaderPollsList" class="space-y-2">
+                        <div class="text-center py-6 text-gray-500">
+                            <i class="fas fa-poll text-3xl mb-2"></i>
+                            <p>No polls available</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-slate-800 rounded-xl shadow-lg p-5">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-bold">Manage Users</h3>
+                        <button onclick="showAddUserModal()" class="text-primary hover:text-primary-80">
+                            <i class="fas fa-user-plus text-lg"></i>
+                        </button>
+                    </div>
+                    <div id="leaderUsersList" class="space-y-2">
+                        <div class="text-center py-6 text-gray-500">
+                            <i class="fas fa-users text-3xl mb-2"></i>
+                            <p>No users found</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-slate-800 rounded-xl shadow-lg p-5 lg:col-span-2">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-bold">Manage Rules</h3>
+                        <button onclick="showAddRuleModal()" class="text-primary hover:text-primary-80">
+                            <i class="fas fa-plus-circle text-lg"></i>
+                        </button>
+                    </div>
+                    <div id="leaderRulesList" class="space-y-2">
+                        <div class="text-center py-6 text-gray-500">
+                            <i class="fas fa-book text-3xl mb-2"></i>
+                            <p>No rules available</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <!-- Create Poll Modal -->
+    <div id="createPollModal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center hidden z-50">
+        <div class="bg-slate-800 rounded-xl shadow-xl p-6 max-w-md w-full animate-slide-up">
+            <h3 class="text-xl font-bold mb-4">Create New Poll</h3>
+            <form onsubmit="addPoll(event)" class="space-y-3">
+                <div>
+                    <label class="block text-gray-300 mb-1.5 font-medium text-sm">Poll Question</label>
+                    <input type="text" id="pollQuestion" required class="w-full px-4 py-2.5 bg-slate-700 border border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-white">
+                </div>
+                <div>
+                    <label class="block text-gray-300 mb-1.5 font-medium text-sm">Options (comma separated)</label>
+                    <input type="text" id="pollOptions" required class="w-full px-4 py-2.5 bg-slate-700 border border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-white" placeholder="Option 1, Option 2, Option 3">
+                </div>
+                <div class="flex space-x-2">
+                    <button type="submit" class="flex-1 bg-primary hover:bg-primary-80 text-white font-bold py-2.5 px-4 rounded-lg transition duration-200">
+                        Create Poll
+                    </button>
+                    <button type="button" onclick="hideCreatePoll()" class="flex-1 bg-slate-700 hover:bg-slate-600 text-gray-300 font-bold py-2.5 px-4 rounded-lg transition duration-200">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Edit User Modal -->
+    <div id="editUserModal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center hidden z-50">
+        <div class="bg-slate-800 rounded-xl shadow-xl p-6 max-w-md w-full animate-slide-up">
+            <h3 class="text-xl font-bold mb-4">Edit User</h3>
+            <form onsubmit="updateUser(event)" class="space-y-3">
+                <input type="hidden" id="editUserId">
+                <div>
+                    <label class="block text-gray-300 mb-1.5 font-medium text-sm">Username</label>
+                    <input type="text" id="editUsername" required class="w-full px-4 py-2.5 bg-slate-700 border border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-white">
+                </div>
+                <div>
+                    <label class="block text-gray-300 mb-1.5 font-medium text-sm">Role</label>
+                    <select id="editRole" class="w-full px-4 py-2.5 bg-slate-700 border border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-white">
+                        <option value="user">User</option>
+                        <option value="leader">Leader</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+                <div class="flex space-x-2">
+                    <button type="submit" class="flex-1 bg-primary hover:bg-primary-80 text-white font-bold py-2.5 px-4 rounded-lg transition duration-200">
+                        Update User
+                    </button>
+                    <button type="button" onclick="hideEditUser()" class="flex-1 bg-slate-700 hover:bg-slate-600 text-gray-300 font-bold py-2.5 px-4 rounded-lg transition duration-200">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Add/Edit Rule Modal -->
+    <div id="ruleModal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center hidden z-50">
+        <div class="bg-slate-800 rounded-xl shadow-xl p-6 max-w-md w-full animate-slide-up">
+            <h3 class="text-xl font-bold mb-4" id="ruleModalTitle">Add New Rule</h3>
+            <form onsubmit="saveRule(event)" class="space-y-3">
+                <input type="hidden" id="ruleId">
+                <div>
+                    <label class="block text-gray-300 mb-1.5 font-medium text-sm">Rule Title</label>
+                    <input type="text" id="ruleTitle" required class="w-full px-4 py-2.5 bg-slate-700 border border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent text-white">
+                </div>
+                <div>
+                    <label class="block text-gray-300 mb-1.5 font-medium text-sm">Rule Description</label>
+                    <textarea id="ruleDescription" rows="3" required class="w-full px-4 py-2.5 bg-slate-700 border border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent text-white"></textarea>
+                </div>
+                <div class="flex space-x-2">
+                    <button type="submit" class="flex-1 bg-accent hover:bg-accent-80 text-white font-bold py-2.5 px-4 rounded-lg transition duration-200">
+                        Save Rule
+                    </button>
+                    <button type="button" onclick="hideRuleModal()" class="flex-1 bg-slate-700 hover:bg-slate-600 text-gray-300 font-bold py-2.5 px-4 rounded-lg transition duration-200">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Notification Toast -->
+    <div id="notificationToast" class="fixed top-4 right-4 hidden z-50">
+        <div class="bg-slate-800 rounded-lg shadow-lg p-4 flex items-center space-x-3 animate-slide-up">
+            <div id="notificationIcon"></div>
+            <div>
+                <p id="notificationMessage" class="font-medium"></p>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Initialize data
+        let currentUser = null;
+        let polls = [];
+        let users = [];
+        let groupMessages = [];
+        let personalMessages = {};
+        let recentActivity = [];
+        let rules = [];
+        
+        // Initialize app
+        function init() {
+            // Check if user is already logged in
+            const savedUser = localStorage.getItem('currentUser');
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+                showMainApp();
+            }
+            
+            // Load saved data
+            const savedPolls = localStorage.getItem('polls');
+            if (savedPolls) polls = JSON.parse(savedPolls);
+            
+            const savedUsers = localStorage.getItem('users');
+            if (savedUsers) users = JSON.parse(savedUsers);
+            
+            // Add default users if they don't exist
+            const defaultUsers = [
+                { id: 1001, username: 'admin', password: '1A', role: 'admin', sport: 'All Sports' },
+                { id: 1002, username: 'leader', password: '1A', role: 'leader', sport: 'Football' },
+                { id: 1003, username: 'user', password: '1A', role: 'user', sport: 'Basketball' }
+            ];
+            
+            defaultUsers.forEach(defaultUser => {
+                const existingUser = users.find(u => u.username === defaultUser.username);
+                if (!existingUser) {
+                    users.push(defaultUser);
+                } else {
+                    // Update existing user to ensure correct password and role
+                    existingUser.password = defaultUser.password;
+                    existingUser.role = defaultUser.role;
+                    existingUser.sport = defaultUser.sport;
+                }
+            });
+            
+            // Save updated users array
+            localStorage.setItem('users', JSON.stringify(users));
+            
+            const savedGroupMessages = localStorage.getItem('groupMessages');
+            if (savedGroupMessages) groupMessages = JSON.parse(savedGroupMessages);
+            
+            const savedPersonalMessages = localStorage.getItem('personalMessages');
+            if (savedPersonalMessages) personalMessages = JSON.parse(savedPersonalMessages);
+            
+            const savedRecentActivity = localStorage.getItem('recentActivity');
+            if (savedRecentActivity) recentActivity = JSON.parse(savedRecentActivity);
+            
+            const savedRules = localStorage.getItem('rules');
+            if (savedRules) rules = JSON.parse(savedRules);
+        }
+        
+        // Authentication
+        function login(event) {
+            event.preventDefault();
+            const username = document.getElementById('loginUsername').value.trim();
+            const password = document.getElementById('loginPassword').value.trim();
+            
+            const user = users.find(u => u.username === username && u.password === password);
+            if (user) {
+                currentUser = user;
+                localStorage.setItem('currentUser', JSON.stringify(user));
+                showMainApp();
+                addActivity(`${user.username} logged in`);
+                showNotification('Login successful!', 'success');
+            } else {
+                showNotification('Invalid username or password', 'error');
+            }
+        }
+        
+        function register(event) {
+            event.preventDefault();
+            const username = document.getElementById('regUsername').value.trim();
+            const password = document.getElementById('regPassword').value.trim();
+            const sport = document.getElementById('regSport').value;
+            
+            if (users.find(u => u.username === username)) {
+                showNotification('Username already exists', 'error');
+                return;
+            }
+            
+            const newUser = { 
+                id: Date.now(), 
+                username, 
+                password, 
+                role: 'user', 
+                sport 
+            };
+            
+            users.push(newUser);
+            localStorage.setItem('users', JSON.stringify(users));
+            showNotification('Registration successful! Please login.', 'success');
+            addActivity(`${username} joined the community`);
+            showSection('login');
+        }
+        
+        function logout() {
+            if (currentUser) {
+                addActivity(`${currentUser.username} logged out`);
+            }
+            currentUser = null;
+            localStorage.removeItem('currentUser');
+            showSection('login');
+            showNotification('Logged out successfully', 'success');
+        }
+        
+        // Navigation
+        function showSection(sectionName) {
+            // Hide all sections
+            const sections = ['login', 'register', 'dashboard', 'voting', 'chat', 'rules', 'admin', 'leader'];
+            sections.forEach(section => {
+                document.getElementById(section + 'Section').classList.add('hidden');
+            });
+            
+            // Show selected section
+            document.getElementById(sectionName + 'Section').classList.remove('hidden');
+            
+            // Update nav buttons
+            const navBtns = document.querySelectorAll('.nav-btn');
+            navBtns.forEach(btn => {
+                btn.classList.remove('bg-slate-700', 'text-white');
+                btn.classList.add('text-gray-300');
+            });
+            
+            if (sectionName !== 'login' && sectionName !== 'register') {
+                const activeBtn = Array.from(navBtns).find(btn => 
+                    btn.textContent.toLowerCase().includes(sectionName)
+                );
+                if (activeBtn) {
+                    activeBtn.classList.add('bg-slate-700', 'text-white');
+                    activeBtn.classList.remove('text-gray-300');
+                }
+            }
+            
+            // Load section content
+            if (sectionName === 'dashboard') loadDashboard();
+            if (sectionName === 'voting') loadPolls();
+            if (sectionName === 'chat') loadChat();
+            if (sectionName === 'rules') loadRules();
+            if (sectionName === 'admin') loadAdminPanel();
+            if (sectionName === 'leader') loadLeaderPanel();
+        }
+        
+        function showMainApp() {
+            document.getElementById('mainNav').classList.remove('hidden');
+            document.getElementById('userInfo').classList.remove('hidden');
+            document.getElementById('usernameDisplay').textContent = `Welcome, ${currentUser.username} (${currentUser.role})`;
+            
+            // Show/hide role-specific buttons
+            if (currentUser.role === 'admin') {
+                document.getElementById('adminPanelBtn').classList.remove('hidden');
+                document.getElementById('createPollBtn').classList.remove('hidden');
+                document.getElementById('addRuleBtn').classList.remove('hidden');
+            } else if (currentUser.role === 'leader') {
+                document.getElementById('leaderPanelBtn').classList.remove('hidden');
+                document.getElementById('createPollBtn').classList.remove('hidden');
+                document.getElementById('addRuleBtn').classList.remove('hidden');
+            }
+            
+            showSection('dashboard');
+        }
+        
+        // Dashboard
+        function loadDashboard() {
+            // Update stats
+            document.getElementById('totalMembers').textContent = users.length;
+            document.getElementById('activePolls').textContent = polls.length;
+            document.getElementById('activeRules').textContent = rules.length;
+            
+            // Load recent activity
+            const activityContainer = document.getElementById('recentActivity');
+            activityContainer.innerHTML = '';
+            
+            if (recentActivity.length === 0) {
+                activityContainer.innerHTML = '<div class="text-center py-6 text-gray-500"><i class="fas fa-history text-3xl mb-2"></i><p class="text-sm">No recent activity</p></div>';
+                return;
+            }
+            
+            // Show only last 5 activities
+            const recent = [...recentActivity].reverse().slice(0, 5);
+            recent.forEach(activity => {
+                const activityDiv = document.createElement('div');
+                activityDiv.className = 'flex items-center p-3 bg-slate-700 rounded-lg hover:bg-slate-600 transition duration-200';
+                activityDiv.innerHTML = `
+                    <div class="bg-blue-900 bg-opacity-30 p-1.5 rounded-full mr-3">
+                        <i class="fas fa-circle text-blue-400 text-xs"></i>
+                    </div>
+                    <div class="flex-1">
+                        <p class="font-semibold">${activity.user}</p>
+                        <p class="text-xs text-gray-400">${activity.action}</p>
+                    </div>
+                    <span class="text-xs text-gray-500">${formatTime(activity.timestamp)}</span>
+                `;
+                activityContainer.appendChild(activityDiv);
+            });
+        }
+        
+        function addActivity(action) {
+            if (!currentUser) return;
+            
+            recentActivity.push({
+                user: currentUser.username,
+                action,
+                timestamp: new Date()
+            });
+            
+            // Keep only last 20 activities
+            if (recentActivity.length > 20) {
+                recentActivity = recentActivity.slice(-20);
+            }
+            
+            localStorage.setItem('recentActivity', JSON.stringify(recentActivity));
+        }
+        
+        function formatTime(timestamp) {
+            const date = new Date(timestamp);
+            const now = new Date();
+            const diffMs = now - date;
+            const diffMins = Math.floor(diffMs / 60000);
+            
+            if (diffMins < 1) return 'Just now';
+            if (diffMins < 60) return `${diffMins}m ago`;
+            
+            const diffHours = Math.floor(diffMins / 60);
+            if (diffHours < 24) return `${diffHours}h ago`;
+            
+            return date.toLocaleDateString();
+        }
+        
+        // Voting System
+        function loadPolls() {
+            const container = document.getElementById('pollsContainer');
+            container.innerHTML = '';
+            
+            if (polls.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-10 bg-slate-800 rounded-xl shadow-lg">
+                        <i class="fas fa-poll text-5xl text-gray-600 mb-3"></i>
+                        <p class="text-gray-500">No polls available. Create your first poll!</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            polls.forEach(poll => {
+                const pollDiv = document.createElement('div');
+                pollDiv.className = 'bg-slate-800 rounded-xl shadow-lg p-5 hover-card';
+                
+                const totalVotes = poll.votes.reduce((a, b) => a + b, 0);
+                let optionsHtml = '';
+                
+                poll.options.forEach((option, index) => {
+                    const percentage = totalVotes > 0 ? Math.round((poll.votes[index] / totalVotes) * 100) : 0;
+                    optionsHtml += `
+                        <div class="mb-3">
+                            <div class="flex justify-between mb-1.5">
+                                <span class="font-medium">${option}</span>
+                                <span class="text-xs text-gray-400">${poll.votes[index]} votes (${percentage}%)</span>
+                            </div>
+                            <div class="w-full bg-slate-700 rounded-full h-2">
+                                <div class="bg-gradient-to-r from-primary to-primary-80 h-2 rounded-full transition-all duration-300" style="width: ${percentage}%"></div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                // Show delete button for admins and leaders
+                const deleteButton = (currentUser.role === 'admin' || currentUser.role === 'leader') ? `
+                    <button onclick="deletePoll(${poll.id})" class="text-sport hover:text-red-400 transition duration-200">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                ` : '';
+                
+                pollDiv.innerHTML = `
+                    <div class="flex items-start justify-between mb-3">
+                        <h3 class="text-lg font-bold">${poll.question}</h3>
+                        ${deleteButton}
+                    </div>
+                    <div class="mb-4">
+                        ${optionsHtml}
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs text-gray-400 bg-slate-700 px-2 py-1 rounded-full">Total votes: ${totalVotes}</span>
+                        <button onclick="vote(${poll.id})" class="bg-gradient-to-r from-primary to-primary-80 hover:from-primary-80 hover:to-primary-70 text-white px-4 py-2 rounded-lg transition duration-200 btn-animate text-sm">
+                            Vote
+                        </button>
+                    </div>
+                `;
+                
+                container.appendChild(pollDiv);
+            });
+        }
+        
+        function vote(pollId) {
+            const poll = polls.find(p => p.id === pollId);
+            if (!poll) return;
+            
+            // Simple voting - just increment first option for demo
+            poll.votes[0]++;
+            localStorage.setItem('polls', JSON.stringify(polls));
+            loadPolls();
+            showNotification('Vote recorded!', 'success');
+            addActivity(`voted on poll: "${poll.question}"`);
+        }
+        
+        function showCreatePoll() {
+            document.getElementById('createPollModal').classList.remove('hidden');
+        }
+        
+        function hideCreatePoll() {
+            document.getElementById('createPollModal').classList.add('hidden');
+            document.getElementById('pollQuestion').value = '';
+            document.getElementById('pollOptions').value = '';
+        }
+        
+        function addPoll(event) {
+            event.preventDefault();
+            const question = document.getElementById('pollQuestion').value;
+            const options = document.getElementById('pollOptions').value.split(',').map(o => o.trim());
+            
+            const newPoll = {
+                id: Date.now(),
+                question,
+                options,
+                votes: new Array(options.length).fill(0),
+                createdBy: currentUser.username
+            };
+            
+            polls.push(newPoll);
+            localStorage.setItem('polls', JSON.stringify(polls));
+            hideCreatePoll();
+            loadPolls();
+            showNotification('Poll created successfully!', 'success');
+            addActivity(`created poll: "${question}"`);
+        }
+        
+        function deletePoll(pollId) {
+            // Only admins and leaders can delete polls
+            if (currentUser.role !== 'admin' && currentUser.role !== 'leader') {
+                showNotification('You do not have permission to delete polls', 'error');
+                return;
+            }
+            
+            const poll = polls.find(p => p.id === pollId);
+            polls = polls.filter(p => p.id !== pollId);
+            localStorage.setItem('polls', JSON.stringify(polls));
+            loadPolls();
+            showNotification('Poll deleted', 'success');
+            addActivity(`deleted poll: "${poll.question}"`);
+        }
+        
+        // Chat System
+        function loadChat() {
+            loadGroupMessages();
+            loadPersonalChatOptions();
+        }
+        
+        function showChatTab(tab) {
+            const tabs = document.querySelectorAll('.chat-tab');
+            tabs.forEach(t => {
+                t.classList.remove('text-primary', 'border-b-2', 'border-primary');
+                t.classList.add('text-gray-400');
+            });
+            
+            event.target.classList.add('text-primary', 'border-b-2', 'border-primary');
+            event.target.classList.remove('text-gray-400');
+            
+            if (tab === 'group') {
+                document.getElementById('groupChat').classList.remove('hidden');
+                document.getElementById('personalChat').classList.add('hidden');
+            } else {
+                document.getElementById('groupChat').classList.add('hidden');
+                document.getElementById('personalChat').classList.remove('hidden');
+            }
+        }
+        
+        function loadGroupMessages() {
+            const container = document.getElementById('groupMessages');
+            container.innerHTML = '';
+            
+            if (groupMessages.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-8 text-gray-500">
+                        <i class="fas fa-comments text-3xl mb-2"></i>
+                        <p>No messages yet. Start the conversation!</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            groupMessages.forEach(msg => {
+                const msgDiv = document.createElement('div');
+                msgDiv.className = `chat-message ${msg.user === currentUser.username ? 'text-right' : ''}`;
+                msgDiv.innerHTML = `
+                    <div class="inline-block max-w-xs lg:max-w-md px-3 py-2 rounded-xl ${
+                        msg.user === currentUser.username 
+                            ? 'bg-gradient-to-r from-primary to-primary-80 text-white' 
+                            : 'bg-slate-700 text-gray-200'
+                    }">
+                        <p class="font-semibold text-xs mb-1">${msg.user}</p>
+                        <p>${msg.message}</p>
+                        <p class="text-xs mt-1 ${msg.user === currentUser.username ? 'text-blue-200' : 'text-gray-400'}">${msg.time}</p>
+                    </div>
+                `;
+                container.appendChild(msgDiv);
+            });
+            
+            container.scrollTop = container.scrollHeight;
+        }
+        
+        function sendGroupMessage(event) {
+            event.preventDefault();
+            const input = document.getElementById('groupMessageInput');
+            const message = input.value.trim();
+            
+            if (message) {
+                const now = new Date();
+                const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                
+                groupMessages.push({
+                    user: currentUser.username,
+                    message,
+                    time
+                });
+                
+                localStorage.setItem('groupMessages', JSON.stringify(groupMessages));
+                loadGroupMessages();
+                input.value = '';
+                
+                // Show notification
+                document.getElementById('chatNotification').classList.remove('hidden');
+                setTimeout(() => {
+                    document.getElementById('chatNotification').classList.add('hidden');
+                }, 3000);
+                
+                addActivity(`sent a group message`);
+            }
+        }
+        
+        function loadPersonalChatOptions() {
+            const select = document.getElementById('userSelect');
+            select.innerHTML = '<option value="">Select a user to chat with</option>';
+            
+            users.filter(u => u.username !== currentUser.username).forEach(user => {
+                const option = document.createElement('option');
+                option.value = user.username;
+                option.textContent = `${user.username} (${user.sport})`;
+                select.appendChild(option);
+            });
+            
+            select.addEventListener('change', function() {
+                const selectedUser = this.value;
+                if (selectedUser) {
+                    document.getElementById('personalMessageInput').disabled = false;
+                    document.getElementById('personalMessageInput').nextElementSibling.disabled = false;
+                    loadPersonalMessages(selectedUser);
+                } else {
+                    document.getElementById('personalMessageInput').disabled = true;
+                    document.getElementById('personalMessageInput').nextElementSibling.disabled = true;
+                    document.getElementById('personalMessages').innerHTML = `
+                        <div class="text-center py-8 text-gray-500">
+                            <i class="fas fa-user-circle text-3xl mb-2"></i>
+                            <p>Select a user to start chatting</p>
+                        </div>
+                    `;
+                }
+            });
+        }
+        
+        function loadPersonalMessages(username) {
+            const container = document.getElementById('personalMessages');
+            container.innerHTML = '';
+            
+            const key = [currentUser.username, username].sort().join('-');
+            const messages = personalMessages[key] || [];
+            
+            if (messages.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-8 text-gray-500">
+                        <i class="fas fa-comments text-3xl mb-2"></i>
+                        <p>No messages yet. Start the conversation!</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            messages.forEach(msg => {
+                const msgDiv = document.createElement('div');
+                msgDiv.className = `chat-message ${msg.sender === currentUser.username ? 'text-right' : ''}`;
+                msgDiv.innerHTML = `
+                    <div class="inline-block max-w-xs lg:max-w-md px-3 py-2 rounded-xl ${
+                        msg.sender === currentUser.username 
+                            ? 'bg-gradient-to-r from-secondary to-secondary-80 text-white' 
+                            : 'bg-slate-700 text-gray-200'
+                    }">
+                        <p>${msg.message}</p>
+                        <p class="text-xs mt-1 ${msg.sender === currentUser.username ? 'text-green-200' : 'text-gray-400'}">${msg.time}</p>
+                    </div>
+                `;
+                container.appendChild(msgDiv);
+            });
+            
+            container.scrollTop = container.scrollHeight;
+        }
+        
+        function sendPersonalMessage(event) {
+            event.preventDefault();
+            const input = document.getElementById('personalMessageInput');
+            const message = input.value.trim();
+            const recipient = document.getElementById('userSelect').value;
+            
+            if (message && recipient) {
+                const now = new Date();
+                const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                const key = [currentUser.username, recipient].sort().join('-');
+                
+                if (!personalMessages[key]) {
+                    personalMessages[key] = [];
+                }
+                
+                personalMessages[key].push({
+                    sender: currentUser.username,
+                    message,
+                    time
+                });
+                
+                localStorage.setItem('personalMessages', JSON.stringify(personalMessages));
+                loadPersonalMessages(recipient);
+                input.value = '';
+                
+                addActivity(`sent a message to ${recipient}`);
+            }
+        }
+        
+        // Rules System
+        function loadRules() {
+            const container = document.getElementById('rulesList');
+            container.innerHTML = '';
+            
+            if (rules.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-10 text-gray-500">
+                        <i class="fas fa-book-open text-5xl mb-3"></i>
+                        <p class="text-lg">No rules have been set yet.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            rules.forEach((rule, index) => {
+                const ruleDiv = document.createElement('div');
+                ruleDiv.className = 'bg-gradient-to-r from-indigo-900 to-purple-900 p-4 rounded-xl border border-indigo-700';
+                
+                // Only show action buttons for admins and leaders
+                let actionButtons = '';
+                if (currentUser.role === 'admin' || currentUser.role === 'leader') {
+                    actionButtons = `
+                        <div class="mt-3 flex space-x-2">
+                            <button onclick="editRule(${index})" class="text-primary hover:text-primary-80 text-sm flex items-center">
+                                <i class="fas fa-edit mr-1"></i>Edit
+                            </button>
+                            <button onclick="deleteRule(${index})" class="text-sport hover:text-red-400 text-sm flex items-center">
+                                <i class="fas fa-trash mr-1"></i>Delete
+                            </button>
+                        </div>
+                    `;
+                }
+                
+                ruleDiv.innerHTML = `
+                    <div class="flex items-start">
+                        <div class="bg-indigo-800 bg-opacity-50 p-2 rounded-full mr-3">
+                            <i class="fas fa-book text-indigo-400"></i>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="font-bold text-lg mb-1">${rule.title}</h3>
+                            <p class="text-gray-300 text-sm">${rule.description}</p>
+                        </div>
+                    </div>
+                    ${actionButtons}
+                `;
+                container.appendChild(ruleDiv);
+            });
+        }
+        
+        function showAddRuleModal() {
+            document.getElementById('ruleModalTitle').textContent = 'Add New Rule';
+            document.getElementById('ruleId').value = '';
+            document.getElementById('ruleTitle').value = '';
+            document.getElementById('ruleDescription').value = '';
+            document.getElementById('ruleModal').classList.remove('hidden');
+        }
+        
+        function editRule(index) {
+            const rule = rules[index];
+            document.getElementById('ruleModalTitle').textContent = 'Edit Rule';
+            document.getElementById('ruleId').value = index;
+            document.getElementById('ruleTitle').value = rule.title;
+            document.getElementById('ruleDescription').value = rule.description;
+            document.getElementById('ruleModal').classList.remove('hidden');
+        }
+        
+        function hideRuleModal() {
+            document.getElementById('ruleModal').classList.add('hidden');
+        }
+        
+        function saveRule(event) {
+            event.preventDefault();
+            const index = document.getElementById('ruleId').value;
+            const title = document.getElementById('ruleTitle').value;
+            const description = document.getElementById('ruleDescription').value;
+            
+            if (index === '') {
+                // Add new rule
+                rules.push({ title, description });
+                addActivity(`added rule: "${title}"`);
+            } else {
+                // Edit existing rule
+                rules[index] = { title, description };
+                addActivity(`updated rule: "${title}"`);
+            }
+            
+            localStorage.setItem('rules', JSON.stringify(rules));
+            hideRuleModal();
+            loadRules();
+            showNotification('Rule saved successfully!', 'success');
+        }
+        
+        function deleteRule(index) {
+            const rule = rules[index];
+            if (confirm(`Are you sure you want to delete the rule: "${rule.title}"?`)) {
+                rules.splice(index, 1);
+                localStorage.setItem('rules', JSON.stringify(rules));
+                loadRules();
+                showNotification('Rule deleted', 'success');
+                addActivity(`deleted rule: "${rule.title}"`);
+            }
+        }
+        
+        // Admin Panel
+        function loadAdminPanel() {
+            // Check if user is admin
+            if (currentUser.role !== 'admin') {
+                showNotification('You do not have permission to access this panel', 'error');
+                showSection('dashboard');
+                return;
+            }
+            
+            // Load polls
+            const adminPollsList = document.getElementById('adminPollsList');
+            adminPollsList.innerHTML = '';
+            
+            if (polls.length === 0) {
+                adminPollsList.innerHTML = '<div class="text-center py-6 text-gray-500"><i class="fas fa-poll text-3xl mb-2"></i><p>No polls available</p></div>';
+            } else {
+                polls.forEach(poll => {
+                    const pollDiv = document.createElement('div');
+                    pollDiv.className = 'flex justify-between items-center p-3 bg-slate-700 rounded-lg hover:bg-slate-600 transition duration-200';
+                    pollDiv.innerHTML = `
+                        <div>
+                            <p class="font-semibold">${poll.question}</p>
+                            <p class="text-xs text-gray-400">Created by ${poll.createdBy}</p>
+                        </div>
+                        <button onclick="deletePoll(${poll.id})" class="text-sport hover:text-red-400 transition duration-200">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    `;
+                    adminPollsList.appendChild(pollDiv);
+                });
+            }
+            
+            // Load users
+            const usersList = document.getElementById('usersList');
+            usersList.innerHTML = '';
+            
+            if (users.length === 0) {
+                usersList.innerHTML = '<div class="text-center py-6 text-gray-500"><i class="fas fa-users text-3xl mb-2"></i><p>No users found</p></div>';
+            } else {
+                users.forEach(user => {
+                    const userDiv = document.createElement('div');
+                    userDiv.className = 'flex justify-between items-center p-3 bg-slate-700 rounded-lg hover:bg-slate-600 transition duration-200';
+                    userDiv.innerHTML = `
+                        <div>
+                            <p class="font-semibold">${user.username}</p>
+                            <p class="text-xs text-gray-400">${user.role} - ${user.sport}</p>
+                        </div>
+                        <div>
+                            <button onclick="editUser(${user.id})" class="text-primary hover:text-primary-80 mr-2 transition duration-200">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button onclick="deleteUser(${user.id})" class="text-sport hover:text-red-400 transition duration-200">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    `;
+                    usersList.appendChild(userDiv);
+                });
+            }
+            
+            // Load rules
+            const adminRulesList = document.getElementById('adminRulesList');
+            adminRulesList.innerHTML = '';
+            
+            if (rules.length === 0) {
+                adminRulesList.innerHTML = '<div class="text-center py-6 text-gray-500"><i class="fas fa-book text-3xl mb-2"></i><p>No rules available</p></div>';
+            } else {
+                rules.forEach((rule, index) => {
+                    const ruleDiv = document.createElement('div');
+                    ruleDiv.className = 'flex justify-between items-center p-3 bg-slate-700 rounded-lg hover:bg-slate-600 transition duration-200';
+                    ruleDiv.innerHTML = `
+                        <div>
+                            <p class="font-semibold">${rule.title}</p>
+                            <p class="text-xs text-gray-400">${rule.description.substring(0, 50)}...</p>
+                        </div>
+                        <div>
+                            <button onclick="editRule(${index})" class="text-primary hover:text-primary-80 mr-2 transition duration-200">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button onclick="deleteRule(${index})" class="text-sport hover:text-red-400 transition duration-200">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    `;
+                    adminRulesList.appendChild(ruleDiv);
+                });
+            }
+        }
+        
+        // Leader Panel
+        function loadLeaderPanel() {
+            // Check if user is leader
+            if (currentUser.role !== 'leader') {
+                showNotification('You do not have permission to access this panel', 'error');
+                showSection('dashboard');
+                return;
+            }
+            
+            // Load polls
+            const leaderPollsList = document.getElementById('leaderPollsList');
+            leaderPollsList.innerHTML = '';
+            
+            if (polls.length === 0) {
+                leaderPollsList.innerHTML = '<div class="text-center py-6 text-gray-500"><i class="fas fa-poll text-3xl mb-2"></i><p>No polls available</p></div>';
+            } else {
+                polls.forEach(poll => {
+                    const pollDiv = document.createElement('div');
+                    pollDiv.className = 'flex justify-between items-center p-3 bg-slate-700 rounded-lg hover:bg-slate-600 transition duration-200';
+                    pollDiv.innerHTML = `
+                        <div>
+                            <p class="font-semibold">${poll.question}</p>
+                            <p class="text-xs text-gray-400">Created by ${poll.createdBy}</p>
+                        </div>
+                        <button onclick="deletePoll(${poll.id})" class="text-sport hover:text-red-400 transition duration-200">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    `;
+                    leaderPollsList.appendChild(pollDiv);
+                });
+            }
+            
+            // Load users (with restrictions)
+            const leaderUsersList = document.getElementById('leaderUsersList');
+            leaderUsersList.innerHTML = '';
+            
+            if (users.length === 0) {
+                leaderUsersList.innerHTML = '<div class="text-center py-6 text-gray-500"><i class="fas fa-users text-3xl mb-2"></i><p>No users found</p></div>';
+            } else {
+                users.forEach(user => {
+                    const userDiv = document.createElement('div');
+                    userDiv.className = 'flex justify-between items-center p-3 bg-slate-700 rounded-lg hover:bg-slate-600 transition duration-200';
+                    
+                    // Check if user is admin - if so, don't show edit/delete buttons
+                    let actionButtons = '';
+                    if (user.role !== 'admin') {
+                        actionButtons = `
+                            <div>
+                                <button onclick="editUser(${user.id})" class="text-primary hover:text-primary-80 mr-2 transition duration-200">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button onclick="deleteUser(${user.id})" class="text-sport hover:text-red-400 transition duration-200">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        `;
+                    } else {
+                        actionButtons = `
+                            <div class="text-xs text-gray-500 bg-slate-600 px-2 py-1 rounded-full">
+                                Protected
+                            </div>
+                        `;
+                    }
+                    
+                    userDiv.innerHTML = `
+                        <div class="flex-1">
+                            <p class="font-semibold">${user.username}</p>
+                            <p class="text-xs text-gray-400">${user.role} - ${user.sport}</p>
+                        </div>
+                        ${actionButtons}
+                    `;
+                    leaderUsersList.appendChild(userDiv);
+                });
+            }
+            
+            // Load rules
+            const leaderRulesList = document.getElementById('leaderRulesList');
+            leaderRulesList.innerHTML = '';
+            
+            if (rules.length === 0) {
+                leaderRulesList.innerHTML = '<div class="text-center py-6 text-gray-500"><i class="fas fa-book text-3xl mb-2"></i><p>No rules available</p></div>';
+            } else {
+                rules.forEach((rule, index) => {
+                    const ruleDiv = document.createElement('div');
+                    ruleDiv.className = 'flex justify-between items-center p-3 bg-slate-700 rounded-lg hover:bg-slate-600 transition duration-200';
+                    ruleDiv.innerHTML = `
+                        <div>
+                            <p class="font-semibold">${rule.title}</p>
+                            <p class="text-xs text-gray-400">${rule.description.substring(0, 50)}...</p>
+                        </div>
+                        <div>
+                            <button onclick="editRule(${index})" class="text-primary hover:text-primary-80 mr-2 transition duration-200">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button onclick="deleteRule(${index})" class="text-sport hover:text-red-400 transition duration-200">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    `;
+                    leaderRulesList.appendChild(ruleDiv);
+                });
+            }
+        }
+        
+        function editUser(userId) {
+            const user = users.find(u => u.id === userId);
+            if (!user) return;
+            
+            // Leaders cannot edit admin users
+            if (currentUser.role === 'leader' && user.role === 'admin') {
+                showNotification('You do not have permission to edit admin users', 'error');
+                return;
+            }
+            
+            document.getElementById('editUserId').value = user.id;
+            document.getElementById('editUsername').value = user.username;
+            document.getElementById('editRole').value = user.role;
+            
+            document.getElementById('editUserModal').classList.remove('hidden');
+        }
+        
+        function hideEditUser() {
+            document.getElementById('editUserModal').classList.add('hidden');
+        }
+        
+        function updateUser(event) {
+            event.preventDefault();
+            const userId = parseInt(document.getElementById('editUserId').value);
+            const username = document.getElementById('editUsername').value;
+            const role = document.getElementById('editRole').value;
+            
+            const user = users.find(u => u.id === userId);
+            if (user) {
+                // Leaders cannot change user role to admin
+                if (currentUser.role === 'leader' && role === 'admin') {
+                    showNotification('You do not have permission to assign admin role', 'error');
+                    return;
+                }
+                
+                const oldUsername = user.username;
+                user.username = username;
+                user.role = role;
+                
+                localStorage.setItem('users', JSON.stringify(users));
+                hideEditUser();
+                
+                // Reload the appropriate panel
+                if (currentUser.role === 'admin') {
+                    loadAdminPanel();
+                } else {
+                    loadLeaderPanel();
+                }
+                
+                showNotification('User updated successfully!', 'success');
+                addActivity(`updated user: ${oldUsername} to ${username}`);
+            }
+        }
+        
+        function deleteUser(userId) {
+            const user = users.find(u => u.id === userId);
+            
+            // Cannot delete own account
+            if (user && user.id === currentUser.id) {
+                showNotification('Cannot delete your own account', 'error');
+                return;
+            }
+            
+            // Leaders cannot delete admin users
+            if (currentUser.role === 'leader' && user.role === 'admin') {
+                showNotification('You do not have permission to delete admin users', 'error');
+                return;
+            }
+            
+            users = users.filter(u => u.id !== userId);
+            localStorage.setItem('users', JSON.stringify(users));
+            
+            // Reload the appropriate panel
+            if (currentUser.role === 'admin') {
+                loadAdminPanel();
+            } else {
+                loadLeaderPanel();
+            }
+            
+            showNotification('User deleted', 'success');
+            addActivity(`deleted user: ${user.username}`);
+        }
+        
+        // Utility Functions
+        function showNotification(message, type) {
+            const toast = document.getElementById('notificationToast');
+            const icon = document.getElementById('notificationIcon');
+            const msg = document.getElementById('notificationMessage');
+            
+            msg.textContent = message;
+            
+            if (type === 'success') {
+                icon.innerHTML = '<i class="fas fa-check-circle text-green-500 text-lg"></i>';
+            } else {
+                icon.innerHTML = '<i class="fas fa-exclamation-circle text-red-500 text-lg"></i>';
+            }
+            
+            toast.classList.remove('hidden');
+            
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 3000);
+        }
+        
+        // Initialize app on load
+        window.onload = init;
+    </script>
+</body>
+</html>
