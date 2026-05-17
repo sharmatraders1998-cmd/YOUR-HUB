@@ -39,7 +39,7 @@
   </div>
 
 <script>
-const API="http://localhost:4000/api";
+const API='http://localhost:4000/api';
 let token=localStorage.getItem('iars_token')||'';
 const term=document.getElementById('terminal');
 const log=(t,w='SYS')=>{const d=document.createElement('div');d.textContent=`[${new Date().toLocaleTimeString()}] ${w}: ${t}`;term.appendChild(d);term.scrollTop=term.scrollHeight;};
