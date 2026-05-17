@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IARS Full Stack</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-950 text-emerald-100 min-h-screen">
+  <div class="max-w-5xl mx-auto p-6 space-y-6">
+    <h1 class="text-4xl font-bold">IARS Full-Stack Dashboard</h1>
+
+    <div class="grid md:grid-cols-2 gap-4">
+      <div class="border border-emerald-800 rounded-xl p-4">
+        <h2 class="font-semibold mb-2">Register</h2>
+        <input id="rUser" class="w-full mb-2 bg-slate-900 border px-2 py-1" placeholder="username"/>
+        <input id="rPass" type="password" class="w-full mb-2 bg-slate-900 border px-2 py-1" placeholder="password"/>
+        <button id="register" class="bg-emerald-700 px-3 py-1 rounded">Register</button>
+      </div>
+      <div class="border border-emerald-800 rounded-xl p-4">
+        <h2 class="font-semibold mb-2">Login</h2>
+        <input id="lUser" class="w-full mb-2 bg-slate-900 border px-2 py-1" placeholder="username"/>
+        <input id="lPass" type="password" class="w-full mb-2 bg-slate-900 border px-2 py-1" placeholder="password"/>
+        <button id="login" class="bg-emerald-700 px-3 py-1 rounded">Login</button>
+      </div>
+    </div>
+
+    <div class="border border-emerald-800 rounded-xl p-4">
+      <div class="flex justify-between items-center">
+        <h2 class="font-semibold">Assistant Terminal</h2>
+        <button id="mic" class="border px-2 py-1 rounded">🎙</button>
+      </div>
+      <div id="terminal" class="bg-black/60 rounded p-3 h-80 overflow-auto mt-3 text-sm"></div>
+      <div class="flex gap-2 mt-3">
+        <input id="msg" class="flex-1 bg-slate-900 border px-2 py-1" placeholder="Ask anything"/>
+        <button id="send" class="bg-emerald-700 px-3 py-1 rounded">Send</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+const API='http://localhost:4000/api';
+let token=localStorage.getItem('iars_token')||'';
+const term=document.getElementById('terminal');
+const log=(t,w='SYS')=>{const d=document.createElement('div');d.textContent=`[${new Date().toLocaleTimeString()}] ${w}: ${t}`;term.appendChild(d);term.scrollTop=term.scrollHeight;};
+
+async function post(url, body, auth=false){
+  const res=await fetch(API+url,{method:'POST',headers:{'Content-Type':'application/json',...(auth?{Authorization:`Bearer ${token}`}:{})},body:JSON.stringify(body)});
+  const data=await res.json(); if(!res.ok) throw new Error(data.error||'Request failed'); return data;
+}
+
+document.getElementById('register').onclick=async()=>{
+  try{const data=await post('/auth/register',{username:rUser.value,password:rPass.value});token=data.token;localStorage.setItem('iars_token',token);log('Registered + logged in','AUTH');}
+  catch(e){log(e.message,'ERR');}
+};
+
+document.getElementById('login').onclick=async()=>{
+  try{const data=await post('/auth/login',{username:lUser.value,password:lPass.value});token=data.token;localStorage.setItem('iars_token',token);log('Logged in','AUTH');loadHistory();}
+  catch(e){log(e.message,'ERR');}
+};
+
+document.getElementById('send').onclick=ask;
+msg.addEventListener('keydown',(e)=>{if(e.key==='Enter')ask();});
+async function ask(){
+  if(!token) return log('Please login first','WARN');
+  const m=msg.value.trim(); if(!m) return;
+  log(m,'YOU'); msg.value='';
+  try{const data=await post('/assistant/chat',{message:m},true);log(data.reply,'IARS');}
+  catch(e){log(e.message,'ERR');}
+}
+
+async function loadHistory(){
+  if(!token) return;
+  const res=await fetch(API+'/assistant/history',{headers:{Authorization:`Bearer ${token}`}});
+  const data=await res.json();
+  (data.messages||[]).forEach((m)=>log(m.content,m.role.toUpperCase()));
+}
+
+document.getElementById('mic').onclick=()=>{
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR)return log('Speech not supported','WARN');
+  const r=new SR(); r.lang='en-US';
+  r.onresult=(e)=>{msg.value=e.results[0][0].transcript;ask();};
+  r.start();
+};
+
+log('Client ready. Start by register/login.');
+loadHistory();
+</script>
+</body>
+</html>
